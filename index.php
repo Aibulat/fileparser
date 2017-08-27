@@ -43,11 +43,27 @@ try {
     }
     unset($arrHotel);
 
+    /** CSV */
+
+    $arrCSVResult = null;
+
+    $objCSVFileParse = new \base\file\CSVFileParser(__DIR__ . '/test_files/gate2.csv');
+
+    foreach ($objCSVFileParse->getData() as $arrHotel) {
+        $arrHotel['photo'] = array_intersect_key($arrHotel, array_flip(['photo1', 'photo2', 'photo3', 'photo4', 'photo5']));
+
+        \base\models\HotelInfo::saveData($arrHotel, 'csv');
+
+        $arrCSVResult[] = $arrHotel;
+    }
+    unset($arrHotel);
+
     /** Result */
 
     echo '<pre>';
     var_dump($arrXMLResult);
     var_dump($arrJSONResult);
+    var_dump($arrCSVResult);
     die;
 }
 catch (Exception $exception) {
