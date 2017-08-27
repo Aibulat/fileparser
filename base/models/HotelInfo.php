@@ -31,15 +31,24 @@ class HotelInfo
         'star_rating'
     ];
 
+    private static $arrService = ['xml', 'json']; // Массив с допустимыми "сервисами"
+
     /**
      * Метод сохраняет данные модели и возвращает результат сохранения
      *
      * @param array $arrHotelInfo
+     * @param $service
      * @return bool
      * @throws \Exception
      */
-    public static function saveData(array $arrHotelInfo)
+    public static function saveData(array $arrHotelInfo, $service)
     {
+        if (!in_array($service, static::$arrService)) {
+            throw (new \Exception('Invalid service value'));
+        }
+
+        $arrHotelInfo['service'] = $service;
+
         // Если переданы необходимые атрибуты модели
         if (count(array_diff(static::$_attributes, array_keys($arrHotelInfo))) === 0) {
             $dbh = (new DataBase())->dbh;
@@ -50,6 +59,8 @@ class HotelInfo
                     VALUES (:' . implode(', :', static::$_attributes) . ')
                 '
             );
+
+            $arrHotelInfo['photo'] = json_encode($arrHotelInfo['photo']);
 
             $savingResult = $stmt->execute(array_intersect_key($arrHotelInfo, array_flip(static::$_attributes)));
         }
