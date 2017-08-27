@@ -1,7 +1,7 @@
 <?php
 
 /**
- * JSONFileParser - класс для работы с файлами JSON
+ * CSVFileParser - класс для работы с файлами CSV
  *
  * @author Айбулат Галимянов <aibulatgalimianov@gmail.com>
  * @version 1.0
@@ -11,25 +11,29 @@ namespace base\file;
 
 use SplFileObject, Exception;
 
-class JSONFileParser extends FileParser
+class CSVFileParser extends FileParser
 {
-    public $structureName = 'JSON';
+    public $structureName = 'CSV';
 
     // Массив с атрибутами для парсинга, формат: ['конечное имя атрибута' => 'исходное имя атрибута', ...]
     // Исходное имя атрибута может включать иерархический разделитель (".") для парсинга не только данных верхнего уровня
     protected $_arrParsAttr = [
-        'hotel_id' => 'id',
-        'name' => 'en.name',
-        'address' => 'en.address',
-        'country_name' => 'en.country',
-        'city_name' => 'en.city',
-        'city_id' => 'region_id',
-        'country_code' => 'country_code',
+        'hotel_id' => 'hotel_id',
+        'name' => 'hotel_name',
+        'address' => 'addressline1',
+        'country_name' => 'country',
+        'city_name' => 'city',
+        'city_id' => 'city_id',
+        'country_code' => 'countryisocode',
         'longitude' => 'longitude',
         'latitude' => 'latitude',
         'star_rating' => 'star_rating',
-        'photo' => 'images',
-        'description' => 'en.description_short'
+        'photo1' => 'photo1',
+        'photo2' => 'photo2',
+        'photo3' => 'photo3',
+        'photo4' => 'photo4',
+        'photo5' => 'photo5',
+        'description' => 'overview'
     ];
 
     public function __construct($filePath)
@@ -40,6 +44,8 @@ class JSONFileParser extends FileParser
         if ($this->_reader === false) {
             throw (new Exception('Failed to open file \'' . $filePath . '\''));
         }
+
+        $this->_reader->setFlags(SplFileObject::READ_CSV);
     }
 
     /**
@@ -50,8 +56,18 @@ class JSONFileParser extends FileParser
     public function getData()
     {
         try {
+            $arrCSVHeader = $this->_reader->fgetcsv();
+            $countHeaderColumns = count($arrCSVHeader);
+
             while (!$this->_reader->eof()) {
-                yield $this->_parse(static::toArray($this->_reader->fgets()));
+                $arrCurrentCSV = $this->_reader->fgetcsv();
+                if (count($arrCurrentCSV) === $countHeaderColumns) {
+                    $arrCombined = array_combine($arrCSVHeader, $arrCurrentCSV);
+
+                    if (is_array($arrCombined)) {
+                        yield $this->_parse($arrCombined);
+                    }
+                }
             }
         } finally {
             $this->_reader = null;
@@ -59,15 +75,13 @@ class JSONFileParser extends FileParser
     }
 
     /**
-     * Метод конвертирует JSON в массив
+     * Метод конвертирует CSV в массив
      *
-     * @param $JSONString
+     * @param $CSVString
      * @return array
      */
-    public static function toArray($JSONString)
+    public static function toArray($CSVString)
     {
-        $result = json_decode($JSONString, true);
-
-        return json_last_error() === JSON_ERROR_NONE ? $result : [];
+        return $CSVString;
     }
 }

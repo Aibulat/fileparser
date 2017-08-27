@@ -31,7 +31,7 @@ class HotelInfo
         'star_rating'
     ];
 
-    private static $arrService = ['xml', 'json']; // Массив с допустимыми "сервисами"
+    private static $arrService = ['xml', 'json', 'csv']; // Массив с допустимыми "сервисами"
 
     /**
      * Метод сохраняет данные модели и возвращает результат сохранения
