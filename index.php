@@ -17,22 +17,37 @@ spl_autoload_register(function ($class_name) {
 
 
 try {
-    $arrResult = null;
+    /** XML */
+
+    $arrXMLResult = null;
 
     $objXMLFileParse = new \base\file\XMLFileParser(__DIR__ . '/test_files/gate3.xml');
 
     foreach ($objXMLFileParse->getData() as $arrHotel) {
-        $arrHotel['service'] = 'xml';
-        $arrHotel['photo'] = json_encode($arrHotel['photo']);
+        \base\models\HotelInfo::saveData($arrHotel, 'xml');
 
-        \base\models\HotelInfo::saveData(['service' => 'xml'] + $arrHotel);
-
-        $arrResult[] = $arrHotel;
+        $arrXMLResult[] = $arrHotel;
     }
     unset($arrHotel);
 
+    /** JSON */
+
+    $arrJSONResult = null;
+
+    $objJSONFileParse = new \base\file\JSONFileParser(__DIR__ . '/test_files/gate1.json');
+
+    foreach ($objJSONFileParse->getData() as $arrHotel) {
+        \base\models\HotelInfo::saveData($arrHotel, 'json');
+
+        $arrJSONResult[] = $arrHotel;
+    }
+    unset($arrHotel);
+
+    /** Result */
+
     echo '<pre>';
-    var_dump($arrResult);
+    var_dump($arrXMLResult);
+    var_dump($arrJSONResult);
     die;
 }
 catch (Exception $exception) {
